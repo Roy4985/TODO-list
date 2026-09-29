@@ -22,6 +22,18 @@ function addTask(title) {
   renderTasks();
 }
 
+function toggleTask(id) {
+  tasks = tasks.map(task =>
+    task.id === id ? { ...task, done: !task.done } : task
+  );
+  renderTasks();
+}
+
+function deleteTask(id) {
+  tasks = tasks.filter(task => task.id !== id);
+  renderTasks();
+}
+
 
 function createTaskElement(task) {
   const li = document.createElement('li');
@@ -90,8 +102,24 @@ function handleSubmit(event) {
   taskInput.focus();
 }
 
+function handleListClick(event) {
+  const li = event.target.closest('li');
+  if (!li) {
+    return;
+  }
+
+  const id = Number(li.dataset.id);
+
+  if (event.target.closest('.delete')) {
+    deleteTask(id);
+  } else {
+    toggleTask(id);
+  }
+}
+
 taskForm.addEventListener('submit', handleSubmit);
 taskInput.addEventListener('input', clearError);
+taskList.addEventListener('click', handleListClick);
 
 
 renderTasks();
