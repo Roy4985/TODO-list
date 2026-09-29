@@ -1,15 +1,39 @@
-let tasks = [
-  { id: 1, title: 'Buy groceries', done: false },
-  { id: 2, title: 'Finish JS assignment', done: true },
-  { id: 3, title: 'Call mom', done: false },
-];
+let tasks = [];
 
+
+const STORAGE_KEY = 'todo-tasks';
+
+function saveTasks() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+}
+
+function loadTasks() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+
+  if (saved === null) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(saved);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    console.warn('Saved tasks were corrupted, starting with an empty list.', error);
+    return [];
+  }
+}
 
 const taskList = document.querySelector('#task-list');
 const counter = document.querySelector('#counter');
 const taskForm = document.querySelector('#task-form');    
 const taskInput = document.querySelector('#task-input');   
 const errorMessage = document.querySelector('#error');   
+
+function updateTasks(newTasks) {
+  tasks = newTasks;
+  saveTasks();
+  renderTasks();
+}
 
 
 function addTask(title) {
@@ -18,20 +42,19 @@ function addTask(title) {
     title: title,
     done: false,
   };
-  tasks = [...tasks, newTask];
-  renderTasks();
+  updateTasks([...tasks, newTask]);
 }
 
 function toggleTask(id) {
-  tasks = tasks.map(task =>
-    task.id === id ? { ...task, done: !task.done } : task
+  updateTasks(
+    tasks.map(task =>
+      task.id === id ? { ...task, done: !task.done } : task
+    )
   );
-  renderTasks();
 }
 
 function deleteTask(id) {
-  tasks = tasks.filter(task => task.id !== id);
-  renderTasks();
+  updateTasks(tasks.filter(task => task.id !== id));
 }
 
 
@@ -122,4 +145,5 @@ taskInput.addEventListener('input', clearError);
 taskList.addEventListener('click', handleListClick);
 
 
+tasks = loadTasks();
 renderTasks();
